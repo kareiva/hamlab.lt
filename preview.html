@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Ham Lab Preview</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+        }
+
+        .preview-container {
+            width: 1200px;
+            height: 630px;
+            background: linear-gradient(45deg, #000000, #001100);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #00ff00;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .logo {
+            width: 200px;
+            height: auto;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 64px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 32px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .features {
+            display: flex;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .feature {
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-container">
+        <div class="grid-overlay"></div>
+        <img src="logo2.png" alt="Ham Lab Logo" class="logo">
+        <div class="title">HAM LAB</div>
+        <div class="subtitle">Hackers · Amateurs · Makers</div>
+        <div class="features">
+            <div class="feature">3D Printing</div>
+            <div class="feature">Electronics</div>
+            <div class="feature">Ham Radio</div>
+            <div class="feature">Robotics</div>
+        </div>
+    </div>
+</body>
+</html> 
