@@ -29,7 +29,10 @@
                 <img src="logo1.png" alt="Ham Lab Logo" class="nav-logo">
                 HAM LAB
             </div>
-            <ul>
+            <button class="menu-toggle" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-menu">
                 <li><a href="#about">About</a></li>
                 <li><a href="#capabilities">Capabilities</a></li>
                 <li><a href="#community">Community</a></li>
@@ -138,5 +141,28 @@
         <p>&copy; 2024 Ham Lab - All rights reserved</p>
         <p><small><a href="90.html" style="color: var(--primary-color);">View our 90's Website</a></small></p>
     </footer>
+    <script>
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.nav-menu').classList.toggle('active');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const nav = document.querySelector('nav');
+            const menu = document.querySelector('.nav-menu');
+            const menuButton = document.querySelector('.menu-toggle');
+            
+            if (!nav.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Close menu when clicking a link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.querySelector('.nav-menu').classList.remove('active');
+            });
+        });
+    </script>
 </body>
 </html> 
