@@ -222,16 +222,6 @@ footer {
 
 .menu-toggle {
     display: none;
-    background: none;
-    border: none;
-    color: var(--primary-color);
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0.5rem;
-}
-
-.menu-toggle:hover {
-    color: #00cc00;
 }
 
 .nav-menu {
@@ -248,15 +238,22 @@ footer {
     }
 
     .menu-toggle {
-        display: flex;
+        display: inline-block !important;
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
         right: 1rem;
-        align-items: center;
-        justify-content: center;
+        background: none;
+        border: none;
+        color: var(--primary-color);
+        font-size: 1.5rem;
+        cursor: pointer;
         padding: 0.5rem;
         z-index: 1001;
+    }
+
+    .menu-toggle:hover {
+        color: #00cc00;
     }
 
     .nav-menu {
