@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ham Lab Terminal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000000;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .terminal-container {
+            width: 100%;
+            max-width: 1000px;
+            height: 80vh;
+            background-color: #0d0d0d;
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-header {
+            background-color: #1a1a1a;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid #00ff00;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .terminal-title {
+            color: #00ff00;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .terminal-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid #00ff00;
+        }
+
+        .btn-close { background-color: #ff5555; }
+        .btn-minimize { background-color: #ffff55; }
+        .btn-maximize { background-color: #50fa7b; }
+
+        .terminal-body {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-output {
+            flex: 1;
+            margin-bottom: 1rem;
+        }
+
+        .terminal-output-line {
+            color: #00ff00;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .terminal-output-line.command {
+            color: #ffffff;
+        }
+
+        .terminal-output-line.error {
+            color: #ff5555;
+        }
+
+        .terminal-output-line.success {
+            color: #50fa7b;
+        }
+
+        .terminal-output-line.info {
+            color: #8be9fd;
+        }
+
+        .terminal-output-line.dim {
+            color: rgba(0, 255, 0, 0.6);
+        }
+
+        .terminal-input-line {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-top: 1px solid rgba(0, 255, 0, 0.2);
+            padding-top: 1rem;
+        }
+
+        .terminal-prompt {
+            color: #00ff00;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .terminal-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            outline: none;
+            caret-color: #00ff00;
+        }
+
+        .terminal-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .terminal-body::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .terminal-body::-webkit-scrollbar-track {
+            background: #0d0d0d;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 0, 0.5);
+        }
+
+        .blink {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .terminal-container {
+                height: 90vh;
+            }
+
+            body {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <span class="terminal-title">visitor@hamlab:~</span>
+            <div class="terminal-controls">
+                <div class="terminal-btn btn-close"></div>
+                <div class="terminal-btn btn-minimize"></div>
+                <div class="terminal-btn btn-maximize"></div>
+            </div>
+        </div>
+        <div class="terminal-body">
+            <div class="terminal-output" id="terminalOutput"></div>
+            <div class="terminal-input-line">
+                <span class="terminal-prompt">visitor@hamlab:~$</span>
+                <input type="text" id="terminalInput" class="terminal-input" placeholder="Type 'help' for commands" autocomplete="off" spellcheck="false" autofocus>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const terminalInput = document.getElementById('terminalInput');
+        const terminalOutput = document.getElementById('terminalOutput');
+
+        const sectionInfo = {
+            'about': `ABOUT HAM LAB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Ham Lab is a community-driven makerspace where technology
+enthusiasts, amateur radio operators, and makers come together
+to create, learn, and share.
+
+As an official endof10.org member, we're committed to open-source
+innovation and collaborative making. Our doors are open to everyone
+who wants to tinker, build, or just hang out with like-minded
+individuals.
+
+Location: Vilnius, Lithuania 🇱🇹`,
+
+            'capabilities': `WHAT WE OFFER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[+] 3D Printing Powerhouse
+    State-of-the-art 3D printing farm with multiple printers
+
+[+] Quadcopter Workshops
+    Build and fly your own drones with hands-on workshops
+
+[+] PlayStation Gaming Corner
+    Kid-friendly gaming zone with PlayStation
+
+[+] Electronics Lab
+    Professional soldering stations and testing equipment
+
+[+] Starlink Internet
+    High-speed satellite internet connectivity
+
+[+] Ham Radio Station
+    Complete amateur radio setup for enthusiasts
+
+[+] Phreaking Corner
+    Telephone and network hardware exploration area
+
+[+] Linux Installation
+    We install and prefer Fedora Linux! (endof10.org initiative)
+
+[+] Coffee Corner
+    Because good hacking requires good coffee`,
+
+            'community': `OUR COMMUNITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[*] Simonas K.     - Founder and Main Sponsor
+[*] Vilius B.      - Hardware and Crazy Ideas
+[*] Henrik K.      - Courtesy of the Domain Name
+[*] Zenonas V.     - Sourcerer of AI Inspiration
+[*] Gintaris Z.    - CNC and other things that move
+[*] Marijus        - 3D printing Guru`,
+
+            'contact': `CONTACT INFORMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Address:   Linkmenų 25, Vilnius 08217, Lithuania
+Phone:     +370 5 207 7909
+Fax:       +370 5 275 2461
+Email:     h4ml4b@gmail.com
+Website:   www.hamlab.lt
+Mastodon:  @hamlab@sutemos.lt
+Facebook:  Ham Lab on Facebook
+Patreon:   www.patreon.com/c/hamlab`,
+
+            'join': `JOIN HAM LAB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+We're always open to new members!
+
+Drop by during our open hours or contact us to schedule a visit.
+
+Support us on Patreon: www.patreon.com/c/hamlab
+Visit our website: www.hamlab.lt`
+        };
+
+        function addOutput(text, type = 'normal') {
+            const line = document.createElement('div');
+            line.className = `terminal-output-line ${type}`;
+            line.textContent = text;
+            terminalOutput.appendChild(line);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const terminalBody = document.querySelector('.terminal-body');
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+        }
+
+        function showHelp() {
+            addOutput('AVAILABLE COMMANDS', 'info');
+            addOutput('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'dim');
+            addOutput('about        - Learn about Ham Lab', 'success');
+            addOutput('capabilities - View our facilities and equipment', 'success');
+            addOutput('community    - Meet our crew', 'success');
+            addOutput('contact      - Get our contact information', 'success');
+            addOutput('join         - Learn how to join us', 'success');
+            addOutput('ls           - List all sections', 'success');
+            addOutput('clear        - Clear terminal screen', 'success');
+            addOutput('help         - Show this help message', 'success');
+            addOutput('whoami       - Display current user', 'success');
+            addOutput('exit         - Return to main website', 'success');
+            addOutput('');
+            addOutput('TIP: Press Tab for autocomplete suggestions', 'dim');
+            addOutput('');
+        }
+
+        function processCommand(input) {
+            addOutput(`visitor@hamlab:~$ ${input}`, 'command');
+
+            const cmd = input.toLowerCase().trim();
+
+            if (!cmd) return;
+
+            if (sectionInfo[cmd]) {
+                addOutput(sectionInfo[cmd]);
+                addOutput('');
+            } else if (cmd === 'help') {
+                showHelp();
+            } else if (cmd === 'ls') {
+                addOutput('Available sections:', 'info');
+                addOutput('about/ capabilities/ community/ contact/ join/', 'success');
+                addOutput('');
+            } else if (cmd === 'clear') {
+                terminalOutput.innerHTML = '';
+            } else if (cmd === 'whoami') {
+                addOutput('visitor', 'success');
+                addOutput('');
+            } else if (cmd === 'exit') {
+                addOutput('Returning to main website...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            } else {
+                addOutput(`bash: ${cmd}: command not found`, 'error');
+                addOutput('Type "help" for available commands', 'dim');
+                addOutput('');
+            }
+        }
+
+        // Autocomplete functionality
+        const availableCommands = ['about', 'capabilities', 'community', 'contact', 'join', 'help', 'ls', 'clear', 'whoami', 'exit'];
+
+        terminalInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const input = this.value.trim().toLowerCase();
+
+                if (!input) {
+                    addOutput('Available commands:', 'dim');
+                    addOutput(availableCommands.join('  '), 'success');
+                    addOutput('');
+                    return;
+                }
+
+                // Find matching commands
+                const matches = availableCommands.filter(cmd => cmd.startsWith(input));
+
+                if (matches.length === 1) {
+                    // Single match - autocomplete
+                    this.value = matches[0];
+                } else if (matches.length > 1) {
+                    // Multiple matches - show options
+                    addOutput(`visitor@hamlab:~$ ${input}`, 'command');
+                    addOutput(matches.join('  '), 'success');
+                    addOutput('');
+                } else {
+                    // No matches - do nothing (terminal beep equivalent would go here)
+                }
+            }
+        });
+
+        terminalInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const input = this.value.trim();
+                if (input) {
+                    processCommand(input);
+                }
+                this.value = '';
+            }
+        });
+
+        // Keep input focused
+        document.addEventListener('click', () => {
+            terminalInput.focus();
+        });
+
+        // Show welcome message
+        setTimeout(() => {
+            addOutput('╔═══════════════════════════════════════════════════════════╗', 'success');
+            addOutput('║                    HAM LAB TERMINAL                       ║', 'success');
+            addOutput('║              Hackers · Amateurs · Makers                  ║', 'success');
+            addOutput('╚═══════════════════════════════════════════════════════════╝', 'success');
+            addOutput('');
+            addOutput('Welcome to Ham Lab Terminal Interface!', 'info');
+            addOutput('Type "help" for available commands or "exit" to return to main website.', 'dim');
+            addOutput('Press Tab for autocomplete suggestions.', 'dim');
+            addOutput('');
+        }, 100);
+    </script>
+</body>
+</html>
