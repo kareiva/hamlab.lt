@@ -265,14 +265,14 @@ h2 {
     letter-spacing: -0.5px;
 }
 
-#about a {
+#about a, .capability-card a {
     color: var(--primary-color);
     text-decoration: none;
     border-bottom: 1px solid rgba(0, 255, 0, 0.3);
     transition: border-color 0.3s ease;
 }
 
-#about a:hover {
+#about a:hover, .capability-card a:hover {
     border-bottom-color: var(--primary-color);
 }
 
